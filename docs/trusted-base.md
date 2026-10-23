@@ -87,6 +87,11 @@ The dedicated Developer Edition org that difftest and the Apex tests run against
 trust that it is representative: no extra automation on the modelled objects, and an API version
 recorded with each difftest run.
 
+Checked before first use (2026-10-23, `sfv-dev`, API 68.0): `OrganizationType` is Developer
+Edition. It had no unmanaged Apex, and has no active flows, no validation or workflow rules on
+Opportunity, and no triggers other than the subject's. Its only installed package is the stock
+`devedapp`. Its `OpportunityStage` rows match `stageProbability`'s table.
+
 ## 9. Process
 
 We trust that `Spec/` and the other 🔒 paths change only through reviewed PRs. See the process gap

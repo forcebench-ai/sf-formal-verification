@@ -35,4 +35,6 @@ running their Apex tests, and difftest.
   needs 75% coverage. That is a useful gate.
 - The org is long-lived, so it can drift through manual changes. Difftest records the org's API
   version with every run, and the platform model names the API version it was validated against.
+  The checks made before first use are listed in `docs/trusted-base.md` §8. Rerun them if the org
+  is ever touched by hand.
 - Developer Edition orgs can be deactivated after long inactivity. CI keeps this one in regular use.

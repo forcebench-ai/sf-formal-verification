@@ -19,7 +19,8 @@ The semantics is *executable*, so it doubles as a reference interpreter. A diffe
 random inputs through the Lean interpreter **and** through real Apex in a Salesforce org and diffs
 the results, which keeps the model honest about how the platform actually behaves.
 
-> **Status: milestone 1 (scaffold) in progress. Nothing about Apex is proven yet.**
+> **Status: milestone 1 (scaffold) done; milestone 2 (subset and semantics) next. Nothing about
+> Apex is proven yet.**
 > The [status table](#status) is the single source of truth for what has been proven.
 > If a claim isn't in that table, it hasn't been proven.
 
@@ -89,7 +90,7 @@ You do **not** need to trust the proofs in `lean/Proofs/` or the reusable lemmas
 
 | Milestone | What it delivers | Status |
 |---|---|---|
-| 1. Scaffold | Layout, ADRs, Lean project + CI, axiom checker, subject deploys and its Apex tests pass | 🚧 Done: layout, ADRs, Lean build, axiom checker + self-tests, lint, independent kernels, CI, subject code. Waiting on: first deploy to the reference org |
+| 1. Scaffold | Layout, ADRs, Lean project + CI, axiom checker, subject deploys and its Apex tests pass | ✅ Layout, ADRs, Lean build, axiom checker + self-tests, lint, independent kernels, CI. The subject is deployed to the reference org, with 21/21 Apex tests passing (including the P1–P5 harness on random inputs) and 100% coverage. CI deploys it on every push once the `SF_AUTH_URL` secret is set |
 | 2. Subset + semantics | Apex subset AST, executable semantics, difftest coverage of every construct | ⏳ |
 | 3. P0 | Exporter for `OpportunityStage.cls`; proof of P0 | ⏳ |
 | 4. P1–P5 | Proofs of the handler properties; bugs found logged in `BUGS.md` | ⏳ |

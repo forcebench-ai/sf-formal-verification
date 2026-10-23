@@ -3,8 +3,9 @@
 # Rust. It is a second kernel, so a bug in Lean's own kernel would also have to exist in nanoda to
 # go unnoticed (docs/trusted-base.md §7).
 #
-# This only re-type-checks. Axiom policy is enforced by `lake exe axiomcheck`; nanoda just reports
-# the axioms it sees, and the export includes the toolchain's own (sorryAx, ofReduceBool, ...).
+# Axiom policy is owned by `lake exe axiomcheck`. nanoda adds a second line of defence: axioms not
+# on the allowlist (the toolchain declares sorryAx, ofReduceBool, ...) are skipped, and any exported
+# declaration that *uses* one is a hard error.
 #
 # Usage, from the repo root after `cd lean && lake build`:
 #   tools/kernels/nanoda.sh
@@ -15,7 +16,7 @@ set -euo pipefail
 LEAN4EXPORT_REPO=https://github.com/leanprover/lean4export.git
 LEAN4EXPORT_REV=5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe  # "chore: bump toolchain to v4.35.0"
 NANODA_REPO=https://github.com/ammkrn/nanoda_lib.git
-NANODA_REV=e5438ac0a85a036b6dfe093aa457bc3448498014       # branch `debug`, as used by lean-action
+NANODA_REV=8199c74c8166dc1fff1be3b4bd144cb725268628       # master, 2026-10-23 (reads lean4export NDJSON)
 
 REPO=$(cd "$(dirname "$0")/../.." && pwd)
 WORK=${NANODA_WORK:-$(mktemp -d)}

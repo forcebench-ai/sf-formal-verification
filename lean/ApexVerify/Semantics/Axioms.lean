@@ -3,7 +3,7 @@
 
 **Trusted base** (`docs/trusted-base.md` §4). These are the only axioms a proof of a `Spec`
 statement may depend on. `lake exe axiomcheck` rejects every other axiom, including `sorryAx`
-(from `sorry`/`admit`) and `Lean.ofReduceBool` (from `native_decide`/`bv_decide`).
+(from `sorry`/`admit`) and the compiler-trusting axioms behind `native_decide`/`bv_decide`.
 
 Adding an entry is a trusted-base change. Update the table in `docs/trusted-base.md` in the same
 PR and justify it there. A project-specific axiom, if one is ever needed, must be declared in

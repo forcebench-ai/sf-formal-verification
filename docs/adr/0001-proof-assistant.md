@@ -107,8 +107,9 @@ Why not:
 
 ## Consequences
 
-- `native_decide` and `bv_decide` are banned: they rely on the `Lean.ofReduceBool` axiom, which
-  trusts the compiler. So are `sorry`, `admit`, new `axiom`s outside
+- `native_decide` and `bv_decide` are banned: they make the kernel trust compiled code. In
+  Lean 4.35 each `native_decide` adds its own auxiliary axiom (`…_native.native_decide.ax_…`);
+  older versions went through `Lean.ofReduceBool`. The allowlist rejects both. So are `sorry`, `admit`, new `axiom`s outside
   `lean/ApexVerify/Semantics/Axioms.lean`, `implemented_by`/`extern` on spec-reachable definitions,
   and `debug.skipKernelTC`. ADR 0002 says how each ban is enforced.
 - Lean releases monthly with breaking changes. We pin and upgrade deliberately, re-running the full

@@ -42,4 +42,4 @@ root = "AxiomCheck"
 [[lean_lib]]
 name = "Fixtures"
 srcDir = "test/axiomcheck"
-globs = ["Fixtures.*"]
+globs = ["Fixtures.+"]

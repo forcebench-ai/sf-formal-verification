@@ -24,7 +24,7 @@ make CI green will find any loophole. The check has to hold up against:
 |---|---|
 | Prove a weaker statement | prove `P1'` that drops a conjunct, then report it as `P1` |
 | Hide a statement from the check | add a Spec file that no root module imports |
-| Use an escape hatch | `sorry`, `native_decide` (→ `Lean.ofReduceBool`), a new `axiom` |
+| Use an escape hatch | `sorry` (→ `sorryAx`), `native_decide` (→ an auxiliary axiom per use in Lean 4.35, `Lean.ofReduceBool` before), a new `axiom` |
 | Skip the kernel | `set_option debug.skipKernelTC true` or meta-code that adds declarations unchecked |
 | Forge the metadata | tamper with the per-module axiom data that `collectAxioms` reads from `.olean` files |
 | Make compiled code differ from kernel code | `@[implemented_by]` / `@[extern]` on a semantics function, so difftest tests code the proofs never saw |

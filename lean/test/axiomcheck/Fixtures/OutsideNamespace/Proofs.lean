@@ -1,0 +1,1 @@
+import Fixtures.OutsideNamespace.Spec

@@ -1,0 +1,1 @@
+-- The root spec module imports nothing; the statement lives in Spec/Extra.lean.

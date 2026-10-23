@@ -42,23 +42,25 @@ jobs:
           python3 tools/lint/escape_hatches.py --self-test
           python3 tools/lint/escape_hatches.py
 
-  independent-kernels:
-    name: Independent re-check (leanchecker, nanoda)
+      - name: Upstream kernel replay (leanchecker)
+        run: make leanchecker
+
+  nanoda:
+    name: Independent kernel (nanoda)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
-      - name: Build and re-check with leanchecker and the nanoda kernel
+      - name: Build (lake build)
         uses: leanprover/lean-action@v1
         with:
           lake-package-directory: lean
           build: true
           test: false
           lint: false
-          leanchecker: true
-          leanchecker-args: "ApexVerify Spec Proofs Subjects"
-          nanoda: true
-          nanoda-allow-sorry: false
+
+      - name: Re-check every project declaration with nanoda
+        run: tools/kernels/nanoda.sh
 
   apex:
     name: Apex subject (deploy + tests)

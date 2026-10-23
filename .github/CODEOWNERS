@@ -20,6 +20,7 @@
 /lean/lake-manifest.json            @leo-dcfa
 /lean/lean-toolchain                @leo-dcfa
 /tools/lint/                        @leo-dcfa
+/tools/kernels/                     @leo-dcfa
 /.github/                           @leo-dcfa
 /Makefile                           @leo-dcfa
 

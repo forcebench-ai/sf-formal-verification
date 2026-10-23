@@ -96,7 +96,8 @@ Opportunity, and no triggers other than the subject's. Its only installed packag
 
 We trust that `Spec/` and the other 🔒 paths change only through reviewed PRs. See the process gap
 recorded in ADR 0002: until agents push under a separate identity, GitHub can't enforce this on its
-own.
+own. For now the repository has a single maintainer and no branch protection (decided 2026-10-24),
+so `git log -- lean/Spec` is the record a reader checks.
 
 ## Not trusted
 

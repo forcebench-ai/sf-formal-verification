@@ -110,4 +110,7 @@ in the checker shows up as a red build rather than as silently accepted bad proo
   pushes using the maintainer's own GitHub credentials, GitHub can't tell the two apart, and
   branch protection can't require "someone else's" approval. Until agents use a separate bot
   identity, the frozen-spec rule is enforced by review discipline and by `git log -- lean/Spec`,
-  not by GitHub.
+  not by GitHub. *Decision (2026-10-24):* the repository has one maintainer, so it has no bot
+  identity and no branch protection for now. Spec changes still go through a PR labelled
+  `spec-change`, in commits of their own, but nothing enforces that. Revisit when a second
+  contributor joins or agents get their own identity.

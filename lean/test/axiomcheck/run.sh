@@ -57,6 +57,16 @@ done
 # --allow-unproven downgrades a missing proof to a warning (local use only; CI never passes it).
 run_case Missing 0 "WARN Fixtures.Missing.Spec.T: no proof" --allow-unproven
 
+# Statements may only depend on reviewed code. Lib is checked (--also) but not trusted.
+covered+=(UntrustedDep TrustedDep)
+run_case UntrustedDep 1 "depends on 1 definition(s) from untrusted modules" \
+  --also Fixtures.UntrustedDep.Lib
+# A trusted definition may contain an untrusted *proof*, but must itself be trusted.
+run_case TrustedDep 0 "PASS: 1 proven, 0 unproven, 0 failure(s)" \
+  --also Fixtures.TrustedDep.Model --also Fixtures.TrustedDep.Lib --trusted Fixtures.TrustedDep.Model
+run_case TrustedDep 1 "Fixtures.TrustedDep.Model.one (in Fixtures.TrustedDep.Model)" \
+  --also Fixtures.TrustedDep.Model --also Fixtures.TrustedDep.Lib
+
 # Every fixture directory must be covered above.
 for dir in test/axiomcheck/Fixtures/*/; do
   name=$(basename "$dir")
@@ -70,4 +80,4 @@ if [[ $failures -ne 0 ]]; then
   echo "axiomcheck self-tests: $failures failure(s)"
   exit 1
 fi
-echo "axiomcheck self-tests: all ${#cases[@]} cases + allow-unproven passed"
+echo "axiomcheck self-tests: all ${#cases[@]} cases + 4 flag variants passed"

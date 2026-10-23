@@ -66,8 +66,13 @@ RULES = [
          under(*TRUSTED_EXECUTABLE)),
     Rule(r"\bunsafe\b", "trusted executable code must not be `unsafe`", under(*TRUSTED_EXECUTABLE)),
     Rule(r"\bopaque\b", "trusted executable code must not be `opaque`", under(*TRUSTED_EXECUTABLE)),
-    Rule(r"#eval\b|\brun_cmd\b|\brun_elab\b|\brun_meta\b",
-         "spec files hold statements only: no meta-code", under("Spec")),
+    # A reviewer reads Spec/ as plain statements. Local notation, macros or instances could make
+    # a statement read differently from what it means; such things belong in trusted modules.
+    Rule(r"#eval\b|\brun_cmd\b|\brun_elab\b|\brun_meta\b|\bmacro(_rules)?\b|\bsyntax\b"
+         r"|\belab(_rules)?\b|\bnotation\b|\binfix[lr]?\b|\bprefix\b|\bpostfix\b"
+         r"|\binstance\b|\battribute\b",
+         "spec files hold plain statements: no meta-code, notation, macros, instances or "
+         "attributes (put those in trusted ApexVerify modules)", under("Spec")),
 ]
 
 
@@ -139,6 +144,10 @@ def self_test() -> int:
         (sem, "partial def f (n : Nat) : Nat := f n", 1),
         (sem, "@[implemented_by g] def f := 1", 1),
         ("Spec/A.lean", "#eval 1", 1),
+        ("Spec/A.lean", 'local notation "ClosedWon" => True', 1),
+        ("Spec/A.lean", "local instance : BEq String := ⟨fun _ _ => true⟩", 1),
+        ("Proofs/A.lean", "instance : Inhabited Nat := ⟨0⟩", 0),
+        ("Spec/A.lean", "def P (s : String) : Prop := s.isPrefixOf \"Closed\"", 0),
         ("Proofs/A.lean", "set_option debug.skipKernelTC true in", 1),
         ("Proofs/A.lean", "theorem sorryFree : True := trivial", 0),  # word boundary
         ("Proofs/A.lean", "def s := \"a \\\" sorry\"\ntheorem t : True := trivial", 0),

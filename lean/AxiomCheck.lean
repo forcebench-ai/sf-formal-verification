@@ -8,20 +8,24 @@ import ApexVerify.Semantics.Axioms
 `Spec/` is proven using only allowlisted axioms. Run it from `lean/` after `lake build`:
 
     lake exe axiomcheck [--root DIR] [--spec PREFIX] [--proofs PREFIX] [--also PREFIX]...
-                        [--allow-unproven]
+                        [--trusted PREFIX]... [--allow-unproven]
 
 1. **Discovery.** Every module under the spec, proofs and `--also` prefixes is found *on disk*,
    so a file that no root module imports is still checked.
 2. **Obligations.** Every parameterless `def _ : Prop` declared in a spec module is a statement.
 3. **Matching.** The proof of `<spec>.X` is the `theorem <proofs>.X`, declared in a proofs module,
    whose type is *syntactically* the constant `<spec>.X`.
-4. **Axioms.** Collected by our own traversal of types and values, not from `.olean` caches, and
+4. **Trusted dependencies.** Everything a statement means must come from reviewed code: the
+   definitions it reaches (skipping proofs, which cannot change meaning) must be declared in a
+   spec module, a `--trusted` module, or the toolchain. Otherwise editing an untrusted helper
+   would silently change the statement.
+5. **Axioms.** Collected by our own traversal of types and values, not from `.olean` caches, and
    checked against `ApexVerify.Semantics.Axioms.allowed`. This is `#print axioms`, done
    programmatically.
-5. **Execution fidelity.** No project constant a statement depends on may be `opaque`/`partial`,
+6. **Execution fidelity.** No project constant a statement depends on may be `opaque`/`partial`,
    `@[implemented_by]` or `@[extern]`. Otherwise the compiled interpreter (what difftest runs)
    would differ from what the kernel reasons about.
-6. **Kernel replay.** Every project declaration is re-checked by the kernel, starting from an
+7. **Kernel replay.** Every project declaration is re-checked by the kernel, starting from an
    environment containing only the toolchain's modules.
 
 Exit status: 0 if every check passed, 1 if any check failed, 2 on a usage or setup error.
@@ -36,23 +40,31 @@ structure Config where
   spec : Name := `Spec
   proofs : Name := `Proofs
   also : Array Name := #[`ApexVerify, `Subjects]
+  /-- Reviewed code that statements may depend on (`docs/trusted-base.md` §2, §3, §5). -/
+  trusted : Array Name := #[`ApexVerify.Syntax, `ApexVerify.Semantics, `ApexVerify.Platform, `Subjects]
   allowUnproven : Bool := false
 
 def usage : String :=
   "usage: lake exe axiomcheck [--root DIR] [--spec PREFIX] [--proofs PREFIX] " ++
-  "[--also PREFIX]... [--allow-unproven]"
+  "[--also PREFIX]... [--trusted PREFIX]... [--allow-unproven]"
 
 def parseArgs (args : List String) : Except String Config :=
-  go {} false args
+  go {} false false args
 where
-  go (cfg : Config) (alsoGiven : Bool) : List String → Except String Config
+  -- The first `--also`/`--trusted` replaces the default list; later ones add to it.
+  go (cfg : Config) (alsoGiven trustedGiven : Bool) : List String → Except String Config
     | [] => .ok cfg
-    | "--root" :: d :: rest => go { cfg with root := d } alsoGiven rest
-    | "--spec" :: p :: rest => go { cfg with spec := p.toName } alsoGiven rest
-    | "--proofs" :: p :: rest => go { cfg with proofs := p.toName } alsoGiven rest
+    | "--root" :: d :: rest => go { cfg with root := d } alsoGiven trustedGiven rest
+    | "--spec" :: p :: rest => go { cfg with spec := p.toName } alsoGiven trustedGiven rest
+    | "--proofs" :: p :: rest => go { cfg with proofs := p.toName } alsoGiven trustedGiven rest
     | "--also" :: p :: rest =>
-      go { cfg with also := (if alsoGiven then cfg.also else #[]).push p.toName } true rest
-    | "--allow-unproven" :: rest => go { cfg with allowUnproven := true } alsoGiven rest
+      go { cfg with also := (if alsoGiven then cfg.also else #[]).push p.toName }
+        true trustedGiven rest
+    | "--trusted" :: p :: rest =>
+      go { cfg with trusted := (if trustedGiven then cfg.trusted else #[]).push p.toName }
+        alsoGiven true rest
+    | "--allow-unproven" :: rest =>
+      go { cfg with allowUnproven := true } alsoGiven trustedGiven rest
     | arg :: _ => .error s!"unknown or incomplete argument '{arg}'\n{usage}"
 
 /-! ## Module discovery -/
@@ -102,20 +114,25 @@ def usedConstants : ConstantInfo → Array Name
   | .recInfo v    => v.type.getUsedConstants
   | .inductInfo v => v.type.getUsedConstants ++ v.ctors.toArray
 
-/-- Every constant reachable from `roots` through types and values, in discovery order. -/
-def reachable (env : Environment) (roots : Array Name) : Array Name := Id.run do
-  let mut seen : NameSet := {}
-  let mut order := #[]
-  let mut stack := roots
-  while !stack.isEmpty do
-    let c := stack.back!
-    stack := stack.pop
-    if seen.contains c then continue
-    seen := seen.insert c
-    order := order.push c
-    if let some ci := env.find? c then
-      stack := stack ++ usedConstants ci
-  return order
+/-- Every constant reachable from `roots` through types and values, in discovery order. With
+`skipTheorems`, theorems are neither returned nor entered: by proof irrelevance they cannot
+change what a definition means or how it executes. -/
+def reachable (env : Environment) (roots : Array Name) (skipTheorems := false) : Array Name :=
+  Id.run do
+    let mut seen : NameSet := {}
+    let mut order := #[]
+    let mut stack := roots
+    while !stack.isEmpty do
+      let c := stack.back!
+      stack := stack.pop
+      if seen.contains c then continue
+      seen := seen.insert c
+      let ci? := env.find? c
+      if skipTheorems && ci? matches some (.thmInfo _) then continue
+      order := order.push c
+      if let some ci := ci? then
+        stack := stack ++ usedConstants ci
+    return order
 
 def axiomsOf (env : Environment) (c : Name) : Array Name :=
   (reachable env #[c]).filter (fun n => env.find? n matches some (.axiomInfo _))
@@ -205,10 +222,26 @@ def checkObligation (cfg : Config) (env : Environment) (proofMods : Array Name) 
   | some _ =>
     fail s!"{c}: {p} exists but is not a theorem"
 
+/-- What a statement means may only come from reviewed code: spec modules, `--trusted` modules
+and the toolchain. -/
+def checkTrustedDependencies (cfg : Config) (env : Environment) (obligations : Array Name) :
+    CheckM Unit := do
+  let isTrusted (m : Name) : Bool :=
+    isToolchainModule m || cfg.spec.isPrefixOf m || cfg.trusted.any (·.isPrefixOf m)
+  for c in obligations do
+    let mut untrusted : Array (Name × Name) := #[]
+    for d in reachable env #[c] (skipTheorems := true) do
+      if let some m := moduleOf env d then
+        unless isTrusted m do untrusted := untrusted.push (d, m)
+    unless untrusted.isEmpty do
+      let shown := untrusted[:5].toArray.toList.map fun (d, m) => s!"{d} (in {m})"
+      fail s!"{c} depends on {untrusted.size} definition(s) from untrusted modules, so editing \
+        them would change the statement without review: {shown}"
+
 /-- Project constants a statement depends on must execute exactly as the kernel sees them. -/
 def checkFidelity (env : Environment) (projectMods : Array Name) (obligations : Array Name) :
     CheckM Unit := do
-  for c in reachable env obligations do
+  for c in reachable env obligations (skipTheorems := true) do
     unless moduleOf env c |>.any projectMods.contains do continue
     if env.find? c matches some (.opaqueInfo _) then
       fail s!"{c} is opaque (declared `opaque` or `partial`): the kernel cannot see its body, \
@@ -257,7 +290,8 @@ def run (cfg : Config) : IO UInt32 := do
     IO.println s!"statements ({obligations.size}):"
     for c in obligations do
       checkObligation cfg env proofMods c
-    IO.println "execution fidelity and kernel replay:"
+    IO.println "trusted dependencies, execution fidelity and kernel replay:"
+    checkTrustedDependencies cfg env obligations
     checkFidelity env projectMods obligations
     replayProject env projectMods
   let ((), report) ← check.run {}

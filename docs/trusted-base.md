@@ -15,7 +15,10 @@ summary only.
 
 *Risk:* a statement is weaker than intended, for example it quantifies over too few inputs or drops
 a conjunct. *Mitigation:* human review, the freeze rule (ADR 0002), and statements written to
-mirror the developer's own harness assertions.
+mirror the developer's own harness assertions. Mechanically: a statement may only depend on
+definitions in `Spec/`, the trusted modules (items 2, 3, 5) and the toolchain, so editing
+untrusted code can't change its meaning. Spec files may not contain notation, macros, instances
+or meta-code, so the source text is what it means.
 
 ## 2. Apex syntax and semantics 🔒
 

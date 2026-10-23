@@ -39,6 +39,7 @@ the results, which keeps the model honest about how the platform actually behave
 - [Roadmap](#roadmap)
 - [Contributing (humans and AI agents)](#contributing-humans-and-ai-agents)
 - [Background](#background)
+- [Licence](#licence)
 
 ---
 
@@ -285,3 +286,7 @@ Architecture decisions are recorded in [`docs/adr/`](docs/adr).
 - [Lean 4](https://lean-lang.org) and its [theorem proving guide](https://lean-lang.org/theorem_proving_in_lean4/).
 - [`@apexdevtools/apex-parser`](https://github.com/apex-dev-tools/apex-parser), the ANTLR-based
   Apex grammar the exporter builds on.
+
+## Licence
+
+[MIT](LICENSE).

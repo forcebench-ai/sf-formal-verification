@@ -6,16 +6,16 @@
 
 name = "sf_verify"
 version = "0.1.0"
-defaultTargets = ["ApexVerify", "Subjects", "Spec", "Proofs", "axiomcheck"]
+defaultTargets = ["SfVerify", "Subjects", "Spec", "Proofs", "axiomcheck"]
 
 [leanOptions]
 autoImplicit = false
 relaxedAutoImplicit = false
 
-# Semantics, platform model, and reusable lemmas.
+# Language models (Apex, ...), platform model, axiom allowlist, and reusable lemmas.
 [[lean_lib]]
-name = "ApexVerify"
-globs = ["ApexVerify.*"]
+name = "SfVerify"
+globs = ["SfVerify.*"]
 
 # Lean ASTs generated from subject .cls files by tools/apex-to-lean.
 [[lean_lib]]

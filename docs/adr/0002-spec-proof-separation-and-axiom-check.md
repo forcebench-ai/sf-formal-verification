@@ -9,7 +9,7 @@ The kickoff's anti-gaming rules require:
 
 1. `lean/Spec/` holds *statements only*. It is human-owned and frozen.
 2. No `sorry`, `admit`, `native_decide` or new `axiom` outside an allowlist in
-   `lean/ApexVerify/Semantics/Axioms.lean`.
+   `lean/SfVerify/Axioms.lean`.
 3. CI runs the equivalent of `#print axioms` on every top-level theorem and fails on anything
    outside the allowlist.
 
@@ -54,7 +54,7 @@ build without its proofs. The convention above keeps `Spec/` independent.
 `lean/AxiomCheck.lean`, a few hundred lines that are part of the trusted base:
 
 1. **Discovers modules from disk.** It walks every `.lean` file under `Spec/` and `Proofs/` (and
-   imports `ApexVerify` and `Subjects` too). It doesn't rely on root modules' import lists, so a
+   imports `SfVerify` and `Subjects` too). It doesn't rely on root modules' import lists, so a
    statement in an un-imported file is still found. The `lakefile.toml` globs build the same files.
 2. **Collects obligations** from each `Spec` module's own declaration list, so it works by file
    rather than by namespace. A `Prop` definition in a Spec file but outside namespace `Spec` is an
@@ -63,14 +63,14 @@ build without its proofs. The convention above keeps `Spec/` independent.
    wrong place, or a proof of a different type is a failure. `--allow-unproven` downgrades a
    missing proof to a warning for local work; CI never passes it.
 4. **Checks trusted dependencies.** Every definition a statement reaches must be declared in a
-   spec module, in a trusted module (`ApexVerify.{Syntax,Semantics,Platform}` and `Subjects` by
+   spec module, in a trusted module (`SfVerify.{Axioms,Apex.Syntax,Apex.Semantics,Platform}` and `Subjects` by
    default, `--trusted` to override), or in the toolchain. Theorems are skipped during this
    traversal: by proof irrelevance a proof can't change what a definition means, so trusted code
-   may use lemmas from `ApexVerify/Lib`. Without this check, editing an untrusted helper could
+   may use lemmas from `SfVerify/Lib`. Without this check, editing an untrusted helper could
    silently weaken a frozen statement.
 5. **Computes axioms itself** by walking the constants reachable from each proof's type and value,
    without using Lean's cached per-module axiom data. Anything not in
-   `ApexVerify.Semantics.Axioms.allowed` is a failure. This is the `#print axioms` check, done
+   `SfVerify.Axioms.allowed` is a failure. This is the `#print axioms` check, done
    programmatically and independently of `.olean` metadata.
 6. **Checks execution fidelity.** No constant from this project that a statement reaches (again
    skipping proofs, which never run) may carry `@[implemented_by]` or `@[extern]`, or be `opaque`/`partial`.
@@ -90,7 +90,7 @@ The exit status is non-zero on any failure, and the report lists every obligatio
 semantics. It catches escape hatches that no theorem depends on *yet*, which the checker can't see.
 In `Spec/` it also rejects meta-code, `notation`, `macro`, `syntax`, `instance` and `attribute`,
 so that a statement means exactly what its source text says. Those belong in trusted
-`ApexVerify` modules, where they are reviewed as part of the model.
+`SfVerify` modules, where they are reviewed as part of the model.
 
 ### Self-tests
 

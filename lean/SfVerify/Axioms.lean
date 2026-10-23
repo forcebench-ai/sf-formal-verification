@@ -10,10 +10,10 @@ PR and justify it there. A project-specific axiom, if one is ever needed, must b
 this file next to the list. The escape-hatch lint rejects the `axiom` keyword everywhere else.
 -/
 
-namespace ApexVerify.Semantics.Axioms
+namespace SfVerify.Axioms
 
 /-- Lean's three standard axioms; nothing project-specific. -/
 def allowed : List Lean.Name :=
   [``propext, ``Quot.sound, ``Classical.choice]
 
-end ApexVerify.Semantics.Axioms
+end SfVerify.Axioms

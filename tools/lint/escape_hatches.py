@@ -23,14 +23,14 @@ LEAN = REPO / "lean"
 
 # Checked sources, relative to lean/. Test fixtures (lean/test/) and the checker itself are out of
 # scope: the fixtures are deliberately full of escape hatches.
-SCOPES = ["ApexVerify", "ApexVerify.lean", "Spec", "Spec.lean", "Proofs", "Proofs.lean",
+SCOPES = ["SfVerify", "SfVerify.lean", "Spec", "Spec.lean", "Proofs", "Proofs.lean",
           "Subjects", "Subjects.lean"]
 
-AXIOMS_FILE = "ApexVerify/Semantics/Axioms.lean"
+AXIOMS_FILE = "SfVerify/Axioms.lean"
 
 # Code that is executed by difftest or states what is proven: it must be total and transparent.
-TRUSTED_EXECUTABLE = ("ApexVerify/Syntax", "ApexVerify/Semantics", "ApexVerify/Platform",
-                      "Subjects", "Spec")
+TRUSTED_EXECUTABLE = ("SfVerify/Axioms", "SfVerify/Apex/Syntax", "SfVerify/Apex/Semantics",
+                      "SfVerify/Platform", "Subjects", "Spec")
 
 
 @dataclass(frozen=True)
@@ -72,7 +72,7 @@ RULES = [
          r"|\belab(_rules)?\b|\bnotation\b|\binfix[lr]?\b|\bprefix\b|\bpostfix\b"
          r"|\binstance\b|\battribute\b",
          "spec files hold plain statements: no meta-code, notation, macros, instances or "
-         "attributes (put those in trusted ApexVerify modules)", under("Spec")),
+         "attributes (put those in trusted SfVerify modules)", under("Spec")),
 ]
 
 
@@ -131,7 +131,7 @@ def files_in_scope() -> list[Path]:
 
 
 def self_test() -> int:
-    sem = "ApexVerify/Semantics/Eval.lean"
+    sem = "SfVerify/Apex/Semantics/Eval.lean"
     cases = [
         ("Proofs/A.lean", "theorem t : 1 = 1 := by sorry", 1),
         ("Proofs/A.lean", "-- sorry, not yet\ntheorem t : 1 = 1 := rfl", 0),

@@ -22,7 +22,7 @@ or meta-code, so the source text is what it means.
 
 ## 2. Apex syntax and semantics 🔒
 
-`lean/ApexVerify/Syntax/` and `lean/ApexVerify/Semantics/`. These define what each Apex construct
+`lean/SfVerify/Apex/Syntax/` and `lean/SfVerify/Apex/Semantics/`. These define what each Apex construct
 in [the subset](apex-subset.md) *means*.
 
 *Risk:* the model differs from real Apex, for example on null handling, string comparison or
@@ -32,7 +32,7 @@ by `tools/difftest` against a real org, and every deliberate simplification is l
 
 ## 3. Platform model 🔒
 
-`lean/ApexVerify/Platform/`: sObject records, field access, `addError`, limit counters, and the
+`lean/SfVerify/Platform/`: sObject records, field access, `addError`, limit counters, and the
 trigger-context assumptions (for example, `oldMap` is null on insert).
 
 *Risk and mitigation:* the same as item 2. The trigger-context assumptions appear in the statements
@@ -40,7 +40,7 @@ as hypotheses, so they are visible in item 1 as well.
 
 ## 4. Axiom allowlist 🔒
 
-`lean/ApexVerify/Semantics/Axioms.lean`. The only axioms any proof may depend on.
+`lean/SfVerify/Axioms.lean`. The only axioms any proof may depend on.
 
 | Axiom | Justification |
 |---|---|
@@ -103,7 +103,7 @@ own.
 You do **not** need to trust any of these:
 
 - `lean/Proofs/`: every proof is re-checked by the kernel, however it was produced;
-- `lean/ApexVerify/Lib/`: reusable lemmas, also kernel-checked;
+- `lean/SfVerify/Lib/`: reusable lemmas, also kernel-checked;
 - tactics, `simp` sets, the elaborator, and any LLM output;
 - the Apex harness and example tests in `subjects/`: useful evidence, but not part of any proof.
 
@@ -112,3 +112,4 @@ You do **not** need to trust any of these:
 | Milestone | Change |
 |---|---|
 | 1 | Initial trusted base: the standard three axioms, the checker, the lint, the CI workflow. No semantics yet. |
+| 1 | Library renamed `ApexVerify` → `SfVerify`, so it can model more than Apex. The allowlist moved to `SfVerify/Axioms.lean`, Apex syntax and semantics to `SfVerify/Apex/`, the platform model to `SfVerify/Platform/`. Same contents, same checks. |

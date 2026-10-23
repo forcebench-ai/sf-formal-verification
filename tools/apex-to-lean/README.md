@@ -13,7 +13,7 @@ subjects/<subject>/force-app/**/<Class>.cls  ──parse──▶  ANTLR parse t
 - Parses with [`@apexdevtools/apex-parser`](https://github.com/apex-dev-tools/apex-parser), pinned
   to an exact version, running on Node.
 - Walks the parse tree and emits one Lean `def` per class whose value is a term of the AST type
-  in `lean/ApexVerify/Syntax/`.
+  in `lean/SfVerify/Apex/Syntax/`.
 - Rejects **anything outside the [modelled subset](../../docs/apex-subset.md)** with an error
   naming the construct, file and line. It never approximates and never drops a construct.
 - Normalises only what Apex itself treats as equivalent: identifier and field-name case, which
@@ -23,7 +23,7 @@ subjects/<subject>/force-app/**/<Class>.cls  ──parse──▶  ANTLR parse t
 
 1. **Round trip.** parse `.cls` → Lean AST term → pretty-print back to Apex → parse again → Lean
    AST term. The two terms must be identical. The pretty-printer lives **in Lean**
-   (`ApexVerify.Syntax`), so the round trip covers the exact term the proofs use, not an
+   (`SfVerify.Apex.Syntax`), so the round trip covers the exact term the proofs use, not an
    intermediate representation of the exporter's own.
 2. **Regeneration in CI.** CI re-runs the exporter on every subject and fails on any diff in
    `lean/Subjects/`, so the generated files can't be edited by hand into something easier to

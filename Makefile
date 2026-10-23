@@ -25,7 +25,7 @@ lint:
 
 # Upstream kernel replay, as a second opinion next to axiomcheck's own replay.
 leanchecker: build
-	cd lean && lake env leanchecker ApexVerify Spec Proofs Subjects
+	cd lean && lake env leanchecker SfVerify Spec Proofs Subjects
 
 apex-deploy:
 	cd $(SUBJECT) && sf project deploy start --source-dir force-app --target-org $(ORG) \

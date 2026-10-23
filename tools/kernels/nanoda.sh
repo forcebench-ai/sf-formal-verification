@@ -43,7 +43,7 @@ fetch "$NANODA_REPO" "$NANODA_REV" "$WORK/nanoda_lib"
 # Every module under the checked prefixes, discovered from disk like axiomcheck does.
 cd "$REPO/lean"
 modules=()
-for prefix in ApexVerify Spec Proofs Subjects; do
+for prefix in SfVerify Spec Proofs Subjects; do
   [[ -f $prefix.lean ]] && modules+=("$prefix")
   if [[ -d $prefix ]]; then
     while IFS= read -r f; do
@@ -57,7 +57,7 @@ lake env "$WORK/lean4export/.lake/build/bin/lean4export" "${modules[@]}" > "$WOR
 echo "export: $(wc -l < "$WORK/export.ndjson") lines"
 
 # Allowed axioms, read from the allowlist so there is a single source of truth.
-axioms=$(grep -o '``[A-Za-z_.]*' ApexVerify/Semantics/Axioms.lean | sed 's/^``//' \
+axioms=$(grep -o '``[A-Za-z_.]*' SfVerify/Axioms.lean | sed 's/^``//' \
   | awk '{printf "%s\"%s\"", (NR>1?", ":""), $0}')
 
 cat > "$WORK/nanoda.json" <<EOF

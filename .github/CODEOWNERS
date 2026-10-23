@@ -2,16 +2,17 @@
 # repository means, so it needs the maintainer's review. Spec changes also need a PR tagged
 # `spec-change` that explains why the statement was wrong.
 #
-# Untrusted paths (lean/Proofs/, lean/ApexVerify/Lib/) are deliberately not listed.
+# Untrusted paths (lean/Proofs/, lean/SfVerify/Lib/) are deliberately not listed.
 
 # Theorem statements
 /lean/Spec/                         @leo-dcfa
 /lean/Spec.lean                     @leo-dcfa
 
-# Apex syntax, semantics, platform model, axiom allowlist
-/lean/ApexVerify/Syntax/            @leo-dcfa
-/lean/ApexVerify/Semantics/         @leo-dcfa
-/lean/ApexVerify/Platform/          @leo-dcfa
+# Axiom allowlist, Apex syntax and semantics, platform model
+/lean/SfVerify/Axioms.lean          @leo-dcfa
+/lean/SfVerify/Apex/Syntax/         @leo-dcfa
+/lean/SfVerify/Apex/Semantics/      @leo-dcfa
+/lean/SfVerify/Platform/            @leo-dcfa
 
 # What decides "proven": checker, its self-tests, lint, build config, CI
 /lean/AxiomCheck.lean               @leo-dcfa

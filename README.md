@@ -79,13 +79,13 @@ reasoning, is in [`docs/trusted-base.md`](docs/trusted-base.md). In short:
 | You must trust | Where it lives | How it's kept honest |
 |---|---|---|
 | The **theorem statements** say what we mean | `lean/Spec/` | Human-owned, frozen, changes need CODEOWNERS review and a `spec-change` PR |
-| The **Apex semantics and platform model** match real Salesforce | `lean/ApexVerify/{Syntax,Semantics,Platform}` | Differential testing against a real org; every simplification named in [`docs/platform-model.md`](docs/platform-model.md) |
+| The **Apex semantics and platform model** match real Salesforce | `lean/SfVerify/{Apex/Syntax,Apex/Semantics,Platform}` | Differential testing against a real org; every simplification named in [`docs/platform-model.md`](docs/platform-model.md) |
 | The **exporter** turns the `.cls` file into the right Lean term | `tools/apex-to-lean/` | Kept tiny; round-trip tests; CI regenerates `lean/Subjects/` and diffs it |
 | The **checker** finds every statement and rejects escape hatches | `lean/AxiomCheck.lean`, `tools/lint/`, `tools/kernels/` | Self-tests with deliberately bad proofs that must be rejected |
 | **Lean's kernel** and toolchain | pinned in `lean/lean-toolchain` | Every project declaration is re-checked in CI three ways: our own kernel replay, upstream `leanchecker`, and [nanoda](https://github.com/ammkrn/nanoda_lib), an independent type checker written in Rust |
 
 You do **not** need to trust the proofs in `lean/Proofs/` or the reusable lemmas in
-`lean/ApexVerify/Lib/`. They may be large and machine-written, and the kernel checks them.
+`lean/SfVerify/Lib/`. They may be large and machine-written, and the kernel checks them.
 
 ## Status
 
@@ -151,9 +151,10 @@ sf-formal-verification/
     trusted-base.md          everything a reader must trust, and why
     open-questions.md        spec ambiguities awaiting a decision
   lean/                      Lean 4 project (lake)
-    ApexVerify/
-      Syntax/                AST for the Apex subset                         [trusted]
-      Semantics/             executable semantics; Axioms.lean = allowlist   [trusted]
+    SfVerify/
+      Axioms.lean            the axiom allowlist                             [trusted]
+      Apex/Syntax/           AST for the Apex subset                         [trusted]
+      Apex/Semantics/        executable semantics of the Apex subset         [trusted]
       Platform/              sObject records, field access, addError, limits [trusted]
       Lib/                   reusable lemmas: lists, maps, nulls, loops      [untrusted]
     Spec/                    theorem STATEMENTS only: human-reviewed, frozen [trusted]
@@ -219,7 +220,7 @@ make apex-deploy ORG=sfv-dev              # deploy + run the subject's Apex test
    spec to make a proof go through. A spec believed to be wrong gets a PR tagged `spec-change`
    explaining why, and CODEOWNERS routes it to the maintainer.
 2. **No escape hatches.** `sorry`, `admit`, `native_decide` and new `axiom`s are rejected unless
-   they appear on the allowlist in `lean/ApexVerify/Semantics/Axioms.lean`. The checker enforces
+   they appear on the allowlist in `lean/SfVerify/Axioms.lean`. The checker enforces
    this three ways:
    - **Axiom allowlist.** `lake exe axiomcheck` requires a `theorem` in `Proofs/` for every
      statement in `Spec/`, whose type is *exactly* that statement, and collects every axiom the
@@ -242,7 +243,7 @@ make apex-deploy ORG=sfv-dev              # deploy + run the subject's Apex test
    picklists, order of execution, …) is written down in
    [`docs/platform-model.md`](docs/platform-model.md). An undocumented simplification is a bug.
 6. **Lemmas are reusable.** Facts about list iteration, null handling, map lookup and field update
-   go into `lean/ApexVerify/Lib/` in general form, so the next subject can reuse them.
+   go into `lean/SfVerify/Lib/` in general form, so the next subject can reuse them.
 
 ## Known gaps and limitations
 
@@ -270,7 +271,7 @@ After the Opportunity stage handler (not started yet):
 Much of the proof work here is expected to be written by AI agents. The rules above apply to
 everyone, and CI enforces the mechanical parts. For anyone, human or agent, working on a proof:
 
-- Treat `lean/Spec/`, `lean/ApexVerify/{Syntax,Semantics,Platform}`, the checker, the lint and the
+- Treat `lean/Spec/`, `lean/SfVerify/{Apex/Syntax,Apex/Semantics,Platform}`, the checker, the lint and the
   exporter as **read-only** unless the change is the point of the PR and is labelled as such.
 - When a proof gets stuck, first check whether the failure is a real counterexample. Run it through
   the executable semantics and, if possible, the org, before assuming the proof just needs more

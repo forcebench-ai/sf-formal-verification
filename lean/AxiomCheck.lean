@@ -1,5 +1,5 @@
 import Lean
-import ApexVerify.Semantics.Axioms
+import SfVerify.Axioms
 
 /-!
 # `lake exe axiomcheck`
@@ -20,7 +20,7 @@ import ApexVerify.Semantics.Axioms
    spec module, a `--trusted` module, or the toolchain. Otherwise editing an untrusted helper
    would silently change the statement.
 5. **Axioms.** Collected by our own traversal of types and values, not from `.olean` caches, and
-   checked against `ApexVerify.Semantics.Axioms.allowed`. This is `#print axioms`, done
+   checked against `SfVerify.Axioms.allowed`. This is `#print axioms`, done
    programmatically.
 6. **Execution fidelity.** No project constant a statement depends on may be `opaque`/`partial`,
    `@[implemented_by]` or `@[extern]`. Otherwise the compiled interpreter (what difftest runs)
@@ -39,9 +39,10 @@ structure Config where
   root : System.FilePath := "."
   spec : Name := `Spec
   proofs : Name := `Proofs
-  also : Array Name := #[`ApexVerify, `Subjects]
+  also : Array Name := #[`SfVerify, `Subjects]
   /-- Reviewed code that statements may depend on (`docs/trusted-base.md` §2, §3, §5). -/
-  trusted : Array Name := #[`ApexVerify.Syntax, `ApexVerify.Semantics, `ApexVerify.Platform, `Subjects]
+  trusted : Array Name :=
+    #[`SfVerify.Axioms, `SfVerify.Apex.Syntax, `SfVerify.Apex.Semantics, `SfVerify.Platform, `Subjects]
   allowUnproven : Bool := false
 
 def usage : String :=
@@ -212,7 +213,7 @@ def checkObligation (cfg : Config) (env : Environment) (proofMods : Array Name) 
       fail s!"{c}: {p} does not prove it; its type is `{t.type}`, expected exactly `{c}`"
     else
       let axs := axiomsOf env p
-      let bad := axs.filter (!ApexVerify.Semantics.Axioms.allowed.contains ·)
+      let bad := axs.filter (!SfVerify.Axioms.allowed.contains ·)
       if bad.isEmpty then
         IO.println s!"  ok   {c}\n         proved by {p}\n         axioms: {axs.toList}"
         modify fun r => { r with proven := r.proven + 1 }
@@ -278,7 +279,7 @@ def run (cfg : Config) : IO UInt32 := do
     alsoMods := alsoMods ++ (← discover cfg.root pfx)
   let projectMods := specMods ++ proofMods ++ alsoMods
   IO.println s!"axiomcheck: {specMods.size} spec, {proofMods.size} proof and \
-    {alsoMods.size} other module(s); allowed axioms {ApexVerify.Semantics.Axioms.allowed}"
+    {alsoMods.size} other module(s); allowed axioms {SfVerify.Axioms.allowed}"
   let env ← importModules (projectMods.map ({ module := · })) {}
   let check : CheckM Unit := do
     for m in env.header.moduleNames do

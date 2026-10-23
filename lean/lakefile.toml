@@ -1,0 +1,45 @@
+# Lake build configuration. Trusted base: see docs/trusted-base.md §6.
+#
+# Every library uses a `.*` glob so that *all* modules under its directory are
+# built, whether or not the root module imports them. `lake exe axiomcheck`
+# discovers modules from disk the same way (ADR 0002).
+
+name = "sf_verify"
+version = "0.1.0"
+defaultTargets = ["ApexVerify", "Subjects", "Spec", "Proofs", "axiomcheck"]
+
+[leanOptions]
+autoImplicit = false
+relaxedAutoImplicit = false
+
+# Semantics, platform model, and reusable lemmas.
+[[lean_lib]]
+name = "ApexVerify"
+globs = ["ApexVerify.*"]
+
+# Lean ASTs generated from subject .cls files by tools/apex-to-lean.
+[[lean_lib]]
+name = "Subjects"
+globs = ["Subjects.*"]
+
+# Theorem statements only: human-owned and frozen.
+[[lean_lib]]
+name = "Spec"
+globs = ["Spec.*"]
+
+# Proofs of the statements in Spec: untrusted, kernel-checked.
+[[lean_lib]]
+name = "Proofs"
+globs = ["Proofs.*"]
+
+# Statement/proof matcher, axiom allowlist, and kernel replay.
+[[lean_exe]]
+name = "axiomcheck"
+root = "AxiomCheck"
+
+# Fixtures for the checker's self-tests (test/axiomcheck/run.sh).
+# Deliberately full of escape hatches; never part of the default build.
+[[lean_lib]]
+name = "Fixtures"
+srcDir = "test/axiomcheck"
+globs = ["Fixtures.*"]

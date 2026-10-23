@@ -1,0 +1,107 @@
+# Trusted base (docs/trusted-base.md §6): this workflow decides what counts as proven.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lean:
+    name: Lean build, axiom check, lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build (lake build)
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          build: true
+          test: false
+          lint: false
+
+      - name: Axiom check (every Spec statement proven, allowlisted axioms, kernel replay)
+        working-directory: lean
+        run: lake exe axiomcheck
+
+      - name: Axiom checker self-tests (bad proofs must be rejected)
+        working-directory: lean
+        run: ./test/axiomcheck/run.sh
+
+      - name: Escape-hatch lint
+        run: |
+          python3 tools/lint/escape_hatches.py --self-test
+          python3 tools/lint/escape_hatches.py
+
+  independent-kernels:
+    name: Independent re-check (leanchecker, nanoda)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build and re-check with leanchecker and the nanoda kernel
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lean
+          build: true
+          test: false
+          lint: false
+          leanchecker: true
+          leanchecker-args: "ApexVerify Spec Proofs Subjects"
+          nanoda: true
+          nanoda-allow-sorry: false
+
+  apex:
+    name: Apex subject (deploy + tests)
+    runs-on: ubuntu-latest
+    # One shared reference org (ADR 0003): never run two deployments against it at once.
+    concurrency:
+      group: apex-reference-org
+      cancel-in-progress: false
+    env:
+      SF_AUTH_URL: ${{ secrets.SF_AUTH_URL }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Skip when the reference org is not configured
+        if: env.SF_AUTH_URL == ''
+        run: echo "::notice::SF_AUTH_URL secret not set (fork PR or not configured); skipping Apex job"
+
+      - uses: actions/setup-node@v7
+        if: env.SF_AUTH_URL != ''
+        with:
+          node-version: 22
+
+      - name: Install Salesforce CLI
+        if: env.SF_AUTH_URL != ''
+        run: npm install --global @salesforce/cli
+
+      - name: Authenticate to the reference org
+        if: env.SF_AUTH_URL != ''
+        run: |
+          printf '%s' "$SF_AUTH_URL" > "$RUNNER_TEMP/auth.txt"
+          sf org login sfdx-url --sfdx-url-file "$RUNNER_TEMP/auth.txt" --alias afv-dev
+          rm "$RUNNER_TEMP/auth.txt"
+
+      - name: Validate (pull requests; check-only, runs tests, changes nothing)
+        if: env.SF_AUTH_URL != '' && github.event_name == 'pull_request'
+        working-directory: subjects/opportunity-stage
+        run: >
+          sf project deploy validate --source-dir force-app --target-org afv-dev
+          --test-level RunLocalTests --wait 30
+
+      - name: Deploy (main)
+        if: env.SF_AUTH_URL != '' && github.event_name != 'pull_request'
+        working-directory: subjects/opportunity-stage
+        run: >
+          sf project deploy start --source-dir force-app --target-org afv-dev
+          --test-level RunLocalTests --wait 30

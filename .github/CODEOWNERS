@@ -1,0 +1,41 @@
+# The trusted base (docs/trusted-base.md). A change to any path below changes what a proof in this
+# repository means, so it needs the maintainer's review. Spec changes also need a PR tagged
+# `spec-change` that explains why the statement was wrong.
+#
+# Untrusted paths (lean/Proofs/, lean/ApexVerify/Lib/) are deliberately not listed.
+
+# Theorem statements
+/lean/Spec/                         @leo-dcfa
+/lean/Spec.lean                     @leo-dcfa
+
+# Apex syntax, semantics, platform model, axiom allowlist
+/lean/ApexVerify/Syntax/            @leo-dcfa
+/lean/ApexVerify/Semantics/         @leo-dcfa
+/lean/ApexVerify/Platform/          @leo-dcfa
+
+# What decides "proven": checker, its self-tests, lint, build config, CI
+/lean/AxiomCheck.lean               @leo-dcfa
+/lean/test/axiomcheck/              @leo-dcfa
+/lean/lakefile.toml                 @leo-dcfa
+/lean/lake-manifest.json            @leo-dcfa
+/lean/lean-toolchain                @leo-dcfa
+/tools/lint/                        @leo-dcfa
+/.github/                           @leo-dcfa
+/Makefile                           @leo-dcfa
+
+# Apex -> Lean exporter and the generated subject terms
+/tools/apex-to-lean/                @leo-dcfa
+/lean/Subjects/                     @leo-dcfa
+
+# Difftest decides whether the model matches reality
+/tools/difftest/                    @leo-dcfa
+
+# Subject code: patches are a cost, not a shortcut (BUGS.md)
+/subjects/*/force-app/              @leo-dcfa
+
+# Documents that define the trust model
+/docs/trusted-base.md               @leo-dcfa
+/docs/platform-model.md             @leo-dcfa
+/docs/apex-subset.md                @leo-dcfa
+/docs/adr/                          @leo-dcfa
+/BUGS.md                            @leo-dcfa

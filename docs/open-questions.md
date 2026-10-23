@@ -48,6 +48,15 @@ reports one error or two will be settled by difftest.
 the list comparison and treat the failure as a real finding. Callers that re-run handlers (for
 example recursion guards) do observe duplicate errors.
 
+**Evidence (2026-10-23):** errors don't accumulate on an in-memory record. A record holds at most
+one record-level error, and a second `addError` replaces the first, even when the message differs
+([`tools/difftest/probes/adderror.apex`](../tools/difftest/probes/adderror.apex), API 68.0). The
+harness's P5 check, which compares error lists after one run and after two, passes in the org
+(21/21 tests). So P5 as written holds for the platform, with no list-versus-set choice needed. The
+platform model follows the observation (`docs/platform-model.md`, Errors). It still has to be
+confirmed inside a trigger during DML. **Proposed resolution:** keep P5 comparing errors exactly,
+and model errors as last-write-wins per target.
+
 ## Q5. The 200-record bound
 
 The kickoff quantifies over lists of *up to 200* records. The semantics has no CPU limit, so the

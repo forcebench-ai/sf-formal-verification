@@ -8,8 +8,12 @@ Status key: ✅ difftested against the reference org · 🚧 modelled, not yet d
 ❌ not modelled. Milestone 1 contains no model yet, so everything below is a design commitment for
 milestone 2, to be confirmed or corrected by difftest.
 
-Reference org: the dedicated Developer Edition org (ADR 0003). The API version is recorded here once
-difftest runs.
+Reference org: the dedicated Developer Edition org `sfv-dev` (ADR 0003), API 68.0, instance USA840.
+Its `OpportunityStage` rows (the standard sales process) match `stageProbability`'s table exactly
+(checked 2026-10-23). Difftest records the API version with every run.
+
+Behaviour marked *observed* below was seen in the reference org by a probe in
+[`tools/difftest/probes/`](../tools/difftest/probes), not yet by difftest.
 
 ## sObject records
 
@@ -38,7 +42,7 @@ difftest runs.
 
 | Aspect | Model | Status |
 |---|---|---|
-| `addError(String)` | Appends the message to the record's error list. Execution continues: `addError` doesn't throw. **Open:** whether repeated calls with the same message accumulate (affects P5; see `open-questions.md`). | ⏳ |
+| `addError(String)` | Errors are a finite map from **target** (the record, or one field) to a message. `record.addError(m)` sets the record's entry to `m`, replacing any earlier one; `record.Field.addError(m)` does the same for that field. Execution continues: `addError` doesn't throw. *Observed* on an in-memory record ([`probes/adderror.apex`](../tools/difftest/probes/adderror.apex)): two calls leave one error and the last message wins, whether the messages are equal or not. Errors on different targets are kept separately, and `getErrors()` isn't in call order, so the model has no order. **To confirm:** the same behaviour inside a trigger during DML (affects P5; see `open-questions.md` Q4). | ⏳ |
 | Uncaught exceptions | The outcome carries the exception type: `NullPointerException`, `ListException`, … The message is not modelled. | ⏳ |
 | Termination | Evaluation uses fuel. Running out of fuel is a distinct outcome, never success. | ⏳ |
 | Unmodelled construct | A distinct `unsupported` outcome, never success. | ⏳ |

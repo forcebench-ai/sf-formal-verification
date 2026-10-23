@@ -24,7 +24,8 @@ line in the debug log. The outcome contains:
 - normal / exception type / unsupported (unsupported must never appear on the Lean side for a
   vector the org ran);
 - every record's populated fields, with Decimals compared by value and scale recorded separately;
-- every record's errors, as an ordered list of messages;
+- every record's errors, as a map from target (the record, or a field) to message. `getErrors()`
+  isn't in call order, so order isn't compared ([`probes/adderror.apex`](probes/adderror.apex));
 - SOQL and DML counters.
 
 ## Keeping the interpreter and the kernel in step

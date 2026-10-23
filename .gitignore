@@ -1,0 +1,31 @@
+# Lean / Lake build output
+lean/.lake/
+**/.lake/
+
+# Salesforce CLI local state and credentials (never commit org auth)
+.sf/
+.sfdx/
+**/.sf/
+**/.sfdx/
+*.authurl
+sfdx-auth-url*.txt
+.localdevserver/
+
+# Node
+node_modules/
+coverage/
+*.tsbuildinfo
+dist/
+
+# Difftest run artifacts (re-generated; failing vectors are copied into tests explicitly)
+tools/difftest/out/
+
+# Python
+__pycache__/
+*.pyc
+
+# Editors / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp

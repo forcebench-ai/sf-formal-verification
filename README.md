@@ -1,5 +1,7 @@
 # SF Formal Verification
 
+[![CI](https://github.com/forcebench-ai/sf-formal-verification/actions/workflows/ci.yml/badge.svg)](https://github.com/forcebench-ai/sf-formal-verification/actions/workflows/ci.yml)
+
 Machine-checked proofs about Salesforce automation, starting with Apex code that operates on core
 CRM objects.
 
@@ -77,8 +79,8 @@ reasoning, is in [`docs/trusted-base.md`](docs/trusted-base.md). In short:
 | The **theorem statements** say what we mean | `lean/Spec/` | Human-owned, frozen, changes need CODEOWNERS review and a `spec-change` PR |
 | The **Apex semantics and platform model** match real Salesforce | `lean/ApexVerify/{Syntax,Semantics,Platform}` | Differential testing against a real org; every simplification named in [`docs/platform-model.md`](docs/platform-model.md) |
 | The **exporter** turns the `.cls` file into the right Lean term | `tools/apex-to-lean/` | Kept tiny; round-trip tests; CI regenerates `lean/Subjects/` and diffs it |
-| The **checker** finds every statement and rejects escape hatches | `lean/AxiomCheck.lean`, `tools/lint/` | Self-tests with deliberately bad proofs that must be rejected |
-| **Lean's kernel** and toolchain | pinned in `lean/lean-toolchain` | Upstream; optional independent re-check with external kernels |
+| The **checker** finds every statement and rejects escape hatches | `lean/AxiomCheck.lean`, `tools/lint/`, `tools/kernels/` | Self-tests with deliberately bad proofs that must be rejected |
+| **Lean's kernel** and toolchain | pinned in `lean/lean-toolchain` | Every project declaration is re-checked in CI three ways: our own kernel replay, upstream `leanchecker`, and [nanoda](https://github.com/ammkrn/nanoda_lib), an independent type checker written in Rust |
 
 You do **not** need to trust the proofs in `lean/Proofs/` or the reusable lemmas in
 `lean/ApexVerify/Lib/`. They may be large and machine-written, and the kernel checks them.
@@ -87,7 +89,7 @@ You do **not** need to trust the proofs in `lean/Proofs/` or the reusable lemmas
 
 | Milestone | What it delivers | Status |
 |---|---|---|
-| 1. Scaffold | Layout, ADRs, Lean project + CI, axiom checker, subject deploys and its Apex tests pass | 🚧 in progress |
+| 1. Scaffold | Layout, ADRs, Lean project + CI, axiom checker, subject deploys and its Apex tests pass | 🚧 Done: layout, ADRs, Lean build, axiom checker + self-tests, lint, independent kernels, CI, subject code. Waiting on: first deploy to the reference org |
 | 2. Subset + semantics | Apex subset AST, executable semantics, difftest coverage of every construct | ⏳ |
 | 3. P0 | Exporter for `OpportunityStage.cls`; proof of P0 | ⏳ |
 | 4. P1–P5 | Proofs of the handler properties; bugs found logged in `BUGS.md` | ⏳ |
@@ -161,6 +163,7 @@ sf-formal-verification/
     apex-to-lean/            Apex parser -> Lean AST exporter + round-trip tests [trusted]
     difftest/                random inputs -> Lean interpreter vs real org -> diff
     lint/                    escape-hatch lint (sorry, native_decide, axiom, ...)
+    kernels/                 re-check with nanoda, an independent kernel (pinned)
   subjects/
     opportunity-stage/       SFDX project: subject classes, trigger, tests, harness
   .github/
@@ -194,6 +197,8 @@ lake exe axiomcheck         # match every Spec statement to its proof, enforce t
 ./test/axiomcheck/run.sh    # the checker must reject sorry, native_decide, new axioms, wrong statements, ...
 cd ..
 python3 tools/lint/escape_hatches.py   # no sorry/admit/native_decide/axiom/implemented_by/... in trusted or proof code
+make leanchecker                       # second opinion: upstream kernel replay
+tools/kernels/nanoda.sh                # third opinion: independent kernel (needs cargo)
 ```
 
 ### Deploy the subject and run its Apex tests

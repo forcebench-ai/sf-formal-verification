@@ -59,7 +59,7 @@ CI regenerates `lean/Subjects/` from the `.cls` files and fails on any diff. (Mi
 
 ## 6. The checker, lint and CI 🔒
 
-`lean/AxiomCheck.lean`, `tools/lint/`, `.github/workflows/ci.yml`, `Makefile`. These decide whether
+`lean/AxiomCheck.lean`, `tools/lint/`, `tools/kernels/`, `.github/workflows/ci.yml`, `Makefile`. These decide whether
 a statement counts as proven.
 
 *Risk:* the checker misses a statement or accepts an escape hatch. *Mitigation:* the checker
@@ -70,7 +70,10 @@ has self-tests with deliberately bad proofs that it must reject (ADR 0002).
 
 Pinned in `lean/lean-toolchain` (currently `leanprover/lean4:v4.35.0`). We trust:
 
-- the **kernel**, which checks every proof term and replays every declaration;
+- the **kernel**, which checks every proof term and replays every declaration. This trust is
+  reduced, not removed: CI re-checks every project declaration with
+  [nanoda](https://github.com/ammkrn/nanoda_lib), an independent type checker written in Rust
+  (`tools/kernels/nanoda.sh`, pinned). A kernel bug would have to exist in both to go unnoticed;
 - `Init`, the core library that the replay starts from, which is not itself re-checked;
 - the **compiler**, which builds the checker and the reference interpreter that difftest runs.
   Proofs don't depend on the compiler. The difftest evidence that the model matches reality does.

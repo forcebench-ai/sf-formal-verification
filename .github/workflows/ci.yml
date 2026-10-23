@@ -91,19 +91,19 @@ jobs:
         if: env.SF_AUTH_URL != ''
         run: |
           printf '%s' "$SF_AUTH_URL" > "$RUNNER_TEMP/auth.txt"
-          sf org login sfdx-url --sfdx-url-file "$RUNNER_TEMP/auth.txt" --alias afv-dev
+          sf org login sfdx-url --sfdx-url-file "$RUNNER_TEMP/auth.txt" --alias sfv-dev
           rm "$RUNNER_TEMP/auth.txt"
 
       - name: Validate (pull requests; check-only, runs tests, changes nothing)
         if: env.SF_AUTH_URL != '' && github.event_name == 'pull_request'
         working-directory: subjects/opportunity-stage
         run: >
-          sf project deploy validate --source-dir force-app --target-org afv-dev
+          sf project deploy validate --source-dir force-app --target-org sfv-dev
           --test-level RunLocalTests --wait 30
 
       - name: Deploy (main)
         if: env.SF_AUTH_URL != '' && github.event_name != 'pull_request'
         working-directory: subjects/opportunity-stage
         run: >
-          sf project deploy start --source-dir force-app --target-org afv-dev
+          sf project deploy start --source-dir force-app --target-org sfv-dev
           --test-level RunLocalTests --wait 30

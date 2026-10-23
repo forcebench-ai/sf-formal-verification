@@ -16,7 +16,7 @@ use by other work. More generally:
 
 ## Decision
 
-Use a **dedicated Developer Edition org**, with local alias `afv-dev`, for deploying subjects,
+Use a **dedicated Developer Edition org**, with local alias `sfv-dev`, for deploying subjects,
 running their Apex tests, and difftest.
 
 - The org is used **only** by this project. No other triggers, flows, validation rules or managed

@@ -36,8 +36,8 @@ that is open question Q1 in [`docs/open-questions.md`](../../docs/open-questions
 Use an org dedicated to this project ([ADR 0003](../../docs/adr/0003-developer-edition-org.md)):
 
 ```sh
-sf org login web --alias afv-dev            # once
-make apex-deploy ORG=afv-dev                # from the repo root: deploy + RunLocalTests
+sf org login web --alias sfv-dev            # once
+make apex-deploy ORG=sfv-dev                # from the repo root: deploy + RunLocalTests
 ```
 
 The random tests use a fixed-seed generator, so a failure reproduces exactly. Each failing

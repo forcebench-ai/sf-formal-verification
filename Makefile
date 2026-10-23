@@ -1,9 +1,9 @@
 # One-command checks. Trusted base: docs/trusted-base.md §6.
 #
 #   make check                   everything CI's Lean job runs
-#   make apex-deploy ORG=alias   deploy the subject and run its Apex tests (default alias afv-dev)
+#   make apex-deploy ORG=alias   deploy the subject and run its Apex tests (default alias sfv-dev)
 
-ORG ?= afv-dev
+ORG ?= sfv-dev
 SUBJECT ?= subjects/opportunity-stage
 
 .PHONY: check build axiomcheck checker-tests lint leanchecker apex-deploy apex-validate apex-test

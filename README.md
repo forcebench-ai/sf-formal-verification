@@ -207,8 +207,8 @@ Use a Developer Edition org (or a scratch org) **dedicated to this project**. Th
 Opportunity trigger, so don't point it at an org whose data you care about.
 
 ```sh
-sf org login web --alias afv-dev          # once
-make apex-deploy ORG=afv-dev              # deploy + run the subject's Apex tests
+sf org login web --alias sfv-dev          # once
+make apex-deploy ORG=sfv-dev              # deploy + run the subject's Apex tests
 ```
 
 ## How the project stays honest

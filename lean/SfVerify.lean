@@ -1,4 +1,7 @@
 import SfVerify.Axioms
+import SfVerify.Platform
+import SfVerify.Apex.Syntax
+import SfVerify.Apex.Semantics
 
 /-!
 # SfVerify

@@ -19,8 +19,8 @@ The semantics is *executable*, so it doubles as a reference interpreter. A diffe
 random inputs through the Lean interpreter **and** through real Apex in a Salesforce org and diffs
 the results, which keeps the model honest about how the platform actually behaves.
 
-> **Status: milestone 1 (scaffold) done; milestone 2 (subset and semantics) next. Nothing about
-> Apex is proven yet.**
+> **Status: milestone 1 (scaffold) done; milestone 2 (subset and semantics) in progress. The
+> semantics isn't yet confirmed against a real org, and nothing about Apex is proven yet.**
 > The [status table](#status) is the single source of truth for what has been proven.
 > If a claim isn't in that table, it hasn't been proven.
 
@@ -92,7 +92,7 @@ You do **not** need to trust the proofs in `lean/Proofs/` or the reusable lemmas
 | Milestone | What it delivers | Status |
 |---|---|---|
 | 1. Scaffold | Layout, ADRs, Lean project + CI, axiom checker, subject deploys and its Apex tests pass | ✅ Layout, ADRs, Lean build, axiom checker + self-tests, lint, independent kernels, CI. The subject is deployed to the reference org, with 21/21 Apex tests passing (including the P1–P5 harness on random inputs) and 100% coverage. CI deploys it on every push once the `SF_AUTH_URL` secret is set |
-| 2. Subset + semantics | Apex subset AST, executable semantics, difftest coverage of every construct | ⏳ |
+| 2. Subset + semantics | Apex subset AST, executable semantics, difftest coverage of every construct | 🚧 AST, interpreter, printer and 261 per-construct vectors are written, and the kernel reproduces every compiled result. **Not yet run in the reference org**, so null handling and non-ASCII case folding are provisional |
 | 3. P0 | Exporter for `OpportunityStage.cls`; proof of P0 | ⏳ |
 | 4. P1–P5 | Proofs of the handler properties; bugs found logged in `BUGS.md` | ⏳ |
 | 5. Write-up | Final statement of what is proven, assumptions, gaps, one-command re-check | ⏳ |
@@ -157,6 +157,7 @@ sf-formal-verification/
       Apex/Semantics/        executable semantics of the Apex subset         [trusted]
       Platform/              sObject records, field access, addError, limits [trusted]
       Lib/                   reusable lemmas: lists, maps, nulls, loops      [untrusted]
+    Difftest/                vectors and the anonymous-Apex emitter          [evidence]
     Spec/                    theorem STATEMENTS only: human-reviewed, frozen [trusted]
     Proofs/                  proofs: may be large and machine-written        [untrusted]
     Subjects/                Lean ASTs generated from subject .cls files     [generated]

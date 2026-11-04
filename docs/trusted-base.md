@@ -114,3 +114,4 @@ You do **not** need to trust any of these:
 |---|---|
 | 1 | Initial trusted base: the standard three axioms, the checker, the lint, the CI workflow. No semantics yet. |
 | 1 | Library renamed `ApexVerify` → `SfVerify`, so it can model more than Apex. The allowlist moved to `SfVerify/Axioms.lean`, Apex syntax and semantics to `SfVerify/Apex/`, the platform model to `SfVerify/Platform/`. Same contents, same checks. |
+| 2 | Added the Apex AST and printer (`Apex/Syntax`), the interpreter (`Apex/Semantics`), and platform values, records and string equality (`Platform`). Provisional until difftest has run against the reference org. |

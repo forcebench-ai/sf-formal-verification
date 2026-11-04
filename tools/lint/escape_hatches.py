@@ -24,7 +24,7 @@ LEAN = REPO / "lean"
 # Checked sources, relative to lean/. Test fixtures (lean/test/) and the checker itself are out of
 # scope: the fixtures are deliberately full of escape hatches.
 SCOPES = ["SfVerify", "SfVerify.lean", "Spec", "Spec.lean", "Proofs", "Proofs.lean",
-          "Subjects", "Subjects.lean"]
+          "Subjects", "Subjects.lean", "Difftest", "DifftestMain.lean"]
 
 AXIOMS_FILE = "SfVerify/Axioms.lean"
 

@@ -2,13 +2,17 @@
 #
 #   make check                   everything CI's Lean job runs
 #   make apex-deploy ORG=alias   deploy the subject and run its Apex tests (default alias sfv-dev)
+#   make difftest ORG=alias      run the vectors in the org and compare with the Lean interpreter
 
 ORG ?= sfv-dev
 SUBJECT ?= subjects/opportunity-stage
 
-.PHONY: check build axiomcheck checker-tests lint leanchecker apex-deploy apex-validate apex-test
+DIFFTEST_OUT ?= $(CURDIR)/tools/difftest/out
 
-check: build axiomcheck checker-tests lint
+.PHONY: check build axiomcheck checker-tests lint leanchecker apex-deploy apex-validate apex-test \
+	difftest-gen difftest-kernel difftest-self-test difftest
+
+check: build axiomcheck checker-tests lint difftest-self-test difftest-kernel
 
 build:
 	cd lean && lake build
@@ -26,6 +30,22 @@ lint:
 # Upstream kernel replay, as a second opinion next to axiomcheck's own replay.
 leanchecker: build
 	cd lean && lake env leanchecker SfVerify Spec Proofs Subjects
+
+# Vectors and expected results from the Lean interpreter. Needs no org.
+difftest-gen: build
+	cd lean && lake exe difftest $(DIFFTEST_OUT)
+
+# The kernel must reproduce every result the compiled interpreter produced. Needs no org.
+difftest-kernel: difftest-gen
+	cd lean && lake env lean $(DIFFTEST_OUT)/kernel-replay.lean
+
+difftest-self-test:
+	python3 tools/difftest/compare.py --self-test
+	python3 tools/difftest/run.py --self-test
+
+# Runs anonymous Apex in the reference org (ADR 0003) and compares.
+difftest: difftest-gen
+	python3 tools/difftest/run.py --dir $(DIFFTEST_OUT) --org $(ORG)
 
 apex-deploy:
 	cd $(SUBJECT) && sf project deploy start --source-dir force-app --target-org $(ORG) \

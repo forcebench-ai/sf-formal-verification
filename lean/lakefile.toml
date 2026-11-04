@@ -6,7 +6,7 @@
 
 name = "sf_verify"
 version = "0.1.0"
-defaultTargets = ["SfVerify", "Subjects", "Spec", "Proofs", "axiomcheck"]
+defaultTargets = ["SfVerify", "Subjects", "Spec", "Proofs", "axiomcheck", "difftest"]
 
 [leanOptions]
 autoImplicit = false
@@ -36,6 +36,15 @@ globs = ["Proofs.*"]
 [[lean_exe]]
 name = "axiomcheck"
 root = "AxiomCheck"
+
+# Difftest vectors and their anonymous-Apex emitter. Evidence, not part of any proof.
+[[lean_lib]]
+name = "Difftest"
+globs = ["Difftest.+"]
+
+[[lean_exe]]
+name = "difftest"
+root = "DifftestMain"
 
 # Fixtures for the checker's self-tests (test/axiomcheck/run.sh).
 # Deliberately full of escape hatches; never part of the default build.
